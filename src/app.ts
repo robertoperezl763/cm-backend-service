@@ -5,6 +5,7 @@ import { Item } from "./models/Items";
 
 function createCollection(): void {
     const collection = new Collection();
+    
 
     //collection.user = user;
     collection.name = 'test collection1';
