@@ -14,14 +14,13 @@ export const itemsController: FastifyPluginCallback = (server, undefined, done) 
     Params: IIdParams  
     Reply: IItemsReply
     }>('/public/:id', { 
-      ...auth(server) 
+      // ...auth(server) 
     }, async (req, reply) => {
 
      const items = await Item.find({
       where: {
         collection: { 
           id: req.params.id,
-          isPublic: true
          }
       }
      });
@@ -120,6 +119,7 @@ export const itemsController: FastifyPluginCallback = (server, undefined, done) 
         name: req.body.item.name,
         description: req.body.item.description,
         imageURL: req.body.item.imageURL,
+        imageUID: req.body.item.imageUID,
         author: req.body.item.author,
         series: req.body.item.series,
         collection: { 

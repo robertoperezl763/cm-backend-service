@@ -1,9 +1,9 @@
 import { FastifyPluginCallback } from 'fastify'
 import { User } from '../models/User';
 import { IIdParams, ISuccessfulReply } from './types/generic.types';
-import { IUserBody, IUserReply, ITokenReply } from './types/user.types';
+import { IUserBody, IUserReply, ILoginReply, ISuccessMessageResponse, IChangePasswordBody } from './types/user.types';
 import { idParamsSchema,successfulResponseSchema  } from './schemas/generic.schemas';
-import { userBodySchema, userResponseSchema, tokenResponseSchema} from './schemas/user.schemas';
+import { userBodySchema, userResponseSchema, tokenResponseSchema, loginResponseSchema} from './schemas/user.schemas';
 import { auth } from '../helper/authenticated';
 import { getIsSuccessfulDelete, getIsSuccessfulUpdate } from '../helper/validation-messages';
 
@@ -28,27 +28,49 @@ export const usersController: FastifyPluginCallback = (server, undefined, done) 
         Reply: IUserReply
       }>('/',{ schema: { ...userBodySchema, ...userResponseSchema } }, async (req, reply) => {
         const user = User.create<User>(req.body.user);
-        const newUser = await user.save();
+        if(!req.body.user.email) throw new Error('No Email Provided');
+        const newUser = await user.save();        
         reply.code(200).send({ user: newUser });
       });
 
       server.post<{
         Body: IUserBody,
-        Reply: ITokenReply
-      }>('/login',{ schema: { ...userBodySchema, ...tokenResponseSchema } }, async (req, reply) => {
+        Reply: ILoginReply
+      }>('/login',{ schema: { ...userBodySchema, ...loginResponseSchema } }, async (req, reply) => {
         const invalidCredentialsError = 'The provided user details are invalid'
         
         const user = await User.findOneBy({ email: req.body.user.email });
         if (!user) throw new Error(invalidCredentialsError);
         
-        const isPasswordValid = user.isPasswordValid(req.body.user.password);
+        const isPasswordValid = await user.isPasswordValid(req.body.user.password);
         if (!isPasswordValid) throw new Error(invalidCredentialsError);
      
         const token = server.jwt.sign({ ...user });
 
-        reply.code(200).send({ token });
+        reply.code(200).send({
+          token,
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName
+          }
+        });
       });
 
+      server.post<{
+        Body: IChangePasswordBody,
+        Reply: ISuccessfulReply
+      }>('/change-password', {...auth(server)}, async (req, reply) => {
+        const user = await User.findOneBy({ id: req.user.id});
+
+        const isPasswordValid = await user.isPasswordValid(req.body.currentPassword);
+        if (!isPasswordValid) throw new Error('Current password is invalid');
+        
+        user.password = req.body.newPassword;
+        await user.save();
+        
+        reply.code(200).send({message: 'Password updated successfully'})
+      })
 
       server.put<{
         Body: IUserBody,

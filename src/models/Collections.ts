@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Unique, BeforeInsert, BeforeUpdate, CreateDateColumn, ManyToOne, OneToMany} from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Unique, BeforeInsert, BeforeUpdate, CreateDateColumn, ManyToOne, OneToMany, JoinColumn, RelationId} from "typeorm"
 import {validateOrReject, MaxLength, IsBoolean, IsOptional} from 'class-validator';
 import { getIsInvalidMessage } from "../helper/validation-messages";
 import { User } from "./User";
@@ -22,9 +22,14 @@ export class Collection extends ExtendBaseEntity{
     @IsOptional()
     description: string;
 
-    @Column()
+    @Column({nullable: true})
+    @IsOptional()
     imageURL: string; //HOW TF DO I HANDLE THIS
     
+    @Column({nullable: true})
+    @IsOptional()
+    imageUID: string
+
 
     @Column({default: false})
     @IsOptional()
@@ -46,13 +51,16 @@ export class Collection extends ExtendBaseEntity{
 
     @ManyToOne(() => User, (user) => user.collections)
     user: User;
-    //######################
-    //Missing stuff for UserID FK
-    //######################
+
+    @RelationId((collection: Collection) => collection.user)
+    userId: number
+
 
 
     //UNCOMMENT IN A SEC
-    @OneToMany(() => Item, (item) => item.collection)
+    @OneToMany(() => Item, (item) => item.collection, {
+        onDelete: 'CASCADE'
+    })
     items: Item[];
     
 }

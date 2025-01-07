@@ -9,6 +9,8 @@ import { usersController } from './controllers/users-controller';
 import { collectionsController } from './controllers/collections-controller';
 import { itemsController } from './controllers/items-controller';
 
+import { seedData } from './seed-data';
+import { imageUploadController } from './controllers/image-upload';
 
 class Application {
     
@@ -37,6 +39,7 @@ class Application {
         this.server.register(usersController, {prefix: `${config.apiPrefix}/users`});
         this.server.register(collectionsController, {prefix: `${config.apiPrefix}/collections`});
         this.server.register(itemsController, {prefix: `${config.apiPrefix}/items`});
+        this.server.register(imageUploadController, {prefix: `${config.apiPrefix}/upload-image`});
         
     }
 
@@ -46,7 +49,7 @@ class Application {
         this.registerPluggins();
         this.registerControllers();
         await this.startHTTPServer();
-
+        await seedData();
         
     }
 }

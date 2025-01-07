@@ -18,6 +18,7 @@ export interface IItemBody {
         name: string,
         description: string,
         imageURL: string,
+        imageUID: string,
         author: string,
         series: string
     }

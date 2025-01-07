@@ -44,6 +44,23 @@ export const userBodySchema: FastifySchema = {
     }
 };
 
+export const loginResponseSchema: FastifySchema = {
+    response: {
+        200 : {
+            type: 'object',
+            required: ['token'],
+            properties: {
+                token: { type: 'string' },
+                user: {
+                    type: 'object',
+                    properties: {
+                        ...userBaseProps
+                    }
+                }
+            },
+    }
+    },
+};
 export const tokenResponseSchema: FastifySchema = {
     response: {
         200 : {

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne} from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, RelationId} from "typeorm"
 import {MaxLength, IsOptional} from 'class-validator';
 import { getIsInvalidMessage } from "../helper/validation-messages";
 import { Collection } from "./Collections";
@@ -24,9 +24,13 @@ export class Item extends ExtendBaseEntity{
     @IsOptional()
     description: string;
 
-    @Column()
+    @Column({nullable: true})
+    @IsOptional()
     imageURL: string; //HOW TF DO I HANDLE THIS
     
+    @Column({nullable: true})
+    @IsOptional()
+    imageUID: string
 
     @Column({nullable: true})
     @IsOptional()
@@ -42,7 +46,12 @@ export class Item extends ExtendBaseEntity{
 
 
 
-    @ManyToOne(() => Collection, (collection) => collection.items)
+    @ManyToOne(() => Collection, (collection) => collection.items, {
+        onDelete: 'CASCADE'
+    })
     collection: Collection;
+
+    @RelationId((item: Item) => item.collection)
+    collectionId: number
     
 }

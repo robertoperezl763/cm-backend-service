@@ -1,7 +1,7 @@
 import { FastifyPluginCallback } from 'fastify'
 import { Collection } from '../models/Collections';
 import { auth } from '../helper/authenticated';
-import { ICollectionsReply, ICollectionReply, ICollectionBody } from './types/collection.types';
+import { ICollectionsReply, ICollectionReply, ICollectionBody, IQuerystring } from './types/collection.types';
 import { IIdParams, ISuccessfulReply } from './types/generic.types';
 import { getIsNotFound, getIsPrivate, getIsSuccessfulDelete, getIsSuccessfulUpdate, getNotYours } from '../helper/validation-messages';
 
@@ -9,15 +9,28 @@ import { getIsNotFound, getIsPrivate, getIsSuccessfulDelete, getIsSuccessfulUpda
 export const collectionsController: FastifyPluginCallback = (server, undefined, done) => {
     //Single Collection Get - Public
     server.get<{
+      Querystring: IQuerystring,
       Reply: ICollectionsReply
     }>('/public', { 
     }, async (req, reply) => {
+      
+    const userFilter: number = Number(req.query.user)
+    if(userFilter){
+      
+      const collections = await Collection.find({
+        where: {
+          isPublic: true,
+          user: { id: userFilter } 
+        }
+      });
+      reply.code(200).send({ collections });
+    }
 
-     const collections = await Collection.find({
+    const collections = await Collection.find({
       where: {
         isPublic: true
         // user: { id: req.user.id }
-      }
+      },
      });
      reply.code(200).send({ collections });
     });
@@ -32,7 +45,7 @@ export const collectionsController: FastifyPluginCallback = (server, undefined, 
      const collection = await Collection.findOne({
       where: {
         id: req.params.id,
-        isPublic: true
+        // isPublic: true
         // user: { id: req.user.id }
       }
      });
@@ -85,6 +98,7 @@ export const collectionsController: FastifyPluginCallback = (server, undefined, 
           name: req.body.collection.name,
           description: req.body.collection.description,
           imageURL: req.body.collection.imageURL,
+          imageUID: req.body.collection.imageUID,
           hasAuthor: req.body.collection.hasAuthor,
           hasSeries: req.body.collection.hasSeries,
           isPublic: req.body.collection.isPublic,
