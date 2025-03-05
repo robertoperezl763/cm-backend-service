@@ -4,6 +4,7 @@ import { User } from "./models/User"
 import { Collection } from "./models/Collections";
 import { Item } from "./models/Items";
 import config from "./config";
+import { Permission } from "./models/permissions";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -14,5 +15,5 @@ export const AppDataSource = new DataSource({
     database: config.postgress.database,
     synchronize: true,
     logging: false,
-    entities: [User, Collection, Item, ]
+    entities: [User, Collection, Item, Permission]
 });

@@ -1,15 +1,49 @@
 import { User } from "./models/User";
 import { createCollection, createItem } from "./helper/seeding-shortcuts";
+import { Permission } from "./models/permissions";
 
 const consolePrefix = 'DATA SEEDING: ';
 
 export const seedData = async () => {
+
+    console.log(consolePrefix, 'Adding Permissions');
+
+    const newAdminPermission = Permission.create<Permission>({
+        name: 'admin'
+    });
+    const newBasePermission = Permission.create<Permission>({
+        name: 'base'
+    });
+
+    let permission;
+
+    try {
+        permission = await newAdminPermission.save();
+        console.log('----------------Created New Permission');
+    } catch(error) {
+        console.log('----------------Permission exists :)');
+    }
+
+    try {
+        permission = await newBasePermission.save();
+        console.log('----------------Created New Permission');
+    } catch(error) {
+        console.log('----------------Permission exists :)');
+    }
+    
+
     console.log(consolePrefix, 'Creating Users');
+
+    const permissionId = (await Permission.findOneBy({name:'base'})).id;
+    console.log(permissionId)
     const userObj = User.create<User>({
-        email: 'testuser@gmail.com',
+        email: 'testuser21651@gmail.com',
         password: '123password',
         lastName: 'Perez',
-        firstName: 'Rob'
+        firstName: 'Rob',
+        permission: {
+            id: permissionId
+        }
     });
 
     let user;

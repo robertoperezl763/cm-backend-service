@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Unique, BeforeInsert, BeforeUpdate, AfterLoad, OneToMany } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Unique, BeforeInsert, BeforeUpdate, AfterLoad, OneToMany, ManyToMany, ManyToOne } from "typeorm"
 import {IsInt, Length, IsEmail, IsDate, Matches, validateOrReject} from 'class-validator';
 import { getIsInvalidMessage } from "../helper/validation-messages";
 import * as bcrypt from 'bcrypt';
 import { Collection } from "./Collections";
 import ExtendBaseEntity from './extend-base-entity'
+import { Permission } from "./permissions";
 
 @Entity()
 @Unique(["email"])
@@ -38,8 +39,8 @@ export class User extends ExtendBaseEntity{
     @OneToMany(() => Collection, (collection) => collection.user)
     collections: Collection[];
 
-
-
+    @ManyToOne(() => Permission, (permissions) => permissions.user )
+    permission: Permission
     //this property stores a cached password used to check
     //if the password was changed during an update
     cachedPassword: string;
